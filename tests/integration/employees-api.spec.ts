@@ -1,12 +1,13 @@
 import { test, expect, APIRequestContext } from '@playwright/test';
+import exp from 'constants';
 
-const baseUrlEmployeesApi = 'https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/api';
-const password = ".a'/;a#[a*CP";
-const userName = 'TestUser723';
+const baseUrlEmployeesApi = `${process.env.BASE_URL_EMPLOYEES_API}`;
+const password = `${process.env.PASSWORD}`;
+const userName = `${process.env.USER_NAME}`;
 const time = 5000; //timeout limit for each request in the tests
 
 let apiContext: APIRequestContext;
-let dependants: string;
+let dependants: number;
 let firstName: string;
 let lastName: string;
 
@@ -19,36 +20,37 @@ test.afterAll(async ({ }) => {
 });
 
 test.beforeEach(async () => {
-    dependants = "3";
-    firstName = `firstName${Date.now()}`;
-    lastName = `lastName${Date.now()}`;
-  });
+    dependants = Math.trunc(Math.random()*20);
+    firstName = `BEFN${Date.now()}`;
+    lastName = `BELN${Date.now()}`;
+});
   
 test.describe("@employees-api", () => {
 
     test('GET /employees 200 status code', async () => {
-        const request = await apiContext.get(`${baseUrlEmployeesApi}/employees`, { 
+        const get_request = await apiContext.get(`${baseUrlEmployeesApi}/employees`, { 
         timeout: time, 
         headers: {
             Accept: 'application/json',
             Authorization: `Basic ${Buffer.from(`${userName}:${password}`).toString('base64')}`
         }
         });
-        expect(request.status()).toBe(200);
+        expect(get_request.status()).toBe(200);
     });
 
     test('GET /employees 401 status code', async () => {
-        const request = await apiContext.get(`${baseUrlEmployeesApi}/employees`, { 
+        const get_request = await apiContext.get(`${baseUrlEmployeesApi}/employees`, { 
         timeout: time, 
         headers: {
             Accept: 'application/json'
         }
         });
-        expect(request.status()).toBe(401);
+        expect(get_request.status()).toBe(401);
     });
 
-    test('POST /employees 201 status code' , async () => {
-        const request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
+    test('POST /employees 200 status code' , async () => {
+        let employeeId = '';
+        const post_request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
             timeout: time,
             data: {
                 firstName: firstName,
@@ -60,11 +62,23 @@ test.describe("@employees-api", () => {
                 Authorization: `Basic ${Buffer.from(`${userName}:${password}`).toString('base64')}`
             }
         });
-        expect(request.status()).toBe(201);
+        expect(post_request.status()).toBe(200);
+
+        //save the response and get the id of the employee
+        let response = await post_request.json();
+        employeeId = response.id;
+
+        const delete_request = await apiContext.delete(`${baseUrlEmployeesApi}/employees/${employeeId}`, { 
+            timeout: time,
+            headers: {
+                Accept: 'application/json',
+                Authorization: `Basic ${Buffer.from(`${userName}:${password}`).toString('base64')}`
+            }
+        });
     });
 
     test('POST /employees 401 status code' , async () => {
-        const request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
+        const post_request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
             timeout: time,
             data: {
                 firstName: firstName,
@@ -75,28 +89,28 @@ test.describe("@employees-api", () => {
                 Accept: 'application/json'
             }
         });
-        expect(request.status()).toBe(401);
+        expect(post_request.status()).toBe(401);
     });
 
     test('POST /employees 400 status code' , async () => {
-        const request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
+        const post_request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
             timeout: time,
             data: {
                 firstName: firstName,
                 lastName: lastName,
-                dependants: "100",
+                dependants: 100,
             },
             headers: {
                 Accept: 'application/json',
                 Authorization: `Basic ${Buffer.from(`${userName}:${password}`).toString('base64')}`
             }
         });
-        expect(request.status()).toBe(400);
+        expect(post_request.status()).toBe(400);
     });
 
     test('GET /employees/{id} 200 status code', async () => {
         let employeeId = '';
-        const request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
+        const post_request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
             timeout: time,
             data: {
                 firstName: firstName,
@@ -108,33 +122,41 @@ test.describe("@employees-api", () => {
                 Authorization: `Basic ${Buffer.from(`${userName}:${password}`).toString('base64')}`
             }
         });
-        expect(request.status()).toBe(200);
+
         //save the response and get the id of the employee
-        let response = await request.json();
+        let response = await post_request.json();
         employeeId = response.id;
 
-        const request1 = await apiContext.get(`${baseUrlEmployeesApi}/employees/${employeeId}`, { 
+        const get_request = await apiContext.get(`${baseUrlEmployeesApi}/employees/${employeeId}`, { 
         timeout: time, 
         headers: {
             Accept: 'application/json',
             Authorization: `Basic ${Buffer.from(`${userName}:${password}`).toString('base64')}`
         }
         });
-        expect(request1.status()).toBe(200);
+        expect(get_request.status()).toBe(200);
+
+        const delete_request = await apiContext.delete(`${baseUrlEmployeesApi}/employees/${employeeId}`, { 
+            timeout: time,
+            headers: {
+                Accept: 'application/json',
+                Authorization: `Basic ${Buffer.from(`${userName}:${password}`).toString('base64')}`
+            }
+        });
     });
 
     test('GET /employees/{id} 401 status code', async () => {
-        const request1 = await apiContext.get(`${baseUrlEmployeesApi}/employees/employeeId`, { 
+        const get_request = await apiContext.get(`${baseUrlEmployeesApi}/employees/employeeId`, { 
         timeout: time, 
         headers: {
             Accept: 'application/json',        }
         });
-        expect(request1.status()).toBe(401);
+        expect(get_request.status()).toBe(401);
     });
 
     test('PUT /employees 200 status code', async () => {
         let employeeId = '';
-        const request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
+        const post_request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
             timeout: time,
             data: {
                 firstName: firstName,
@@ -146,30 +168,38 @@ test.describe("@employees-api", () => {
                 Authorization: `Basic ${Buffer.from(`${userName}:${password}`).toString('base64')}`
             }
         });
-        expect(request.status()).toBe(200);
+
         //save the response and get the id of the employee
-        let response = await request.json();
+        let response = await post_request.json();
         employeeId = response.id;
 
-        const request1 = await apiContext.put(`${baseUrlEmployeesApi}/employees`, { 
+        const put_request = await apiContext.put(`${baseUrlEmployeesApi}/employees`, { 
             timeout: time,
             data: {
                 id: employeeId,
                 firstName: firstName + "Edited",
                 lastName: lastName + "Edited",
-                dependants: "3",
+                dependants: dependants,
             },
             headers: {
                 Accept: 'application/json',
                 Authorization: `Basic ${Buffer.from(`${userName}:${password}`).toString('base64')}`
             }
         });
-        expect(request1.status()).toBe(200);
+        expect(put_request.status()).toBe(200);
+
+        const request2 = await apiContext.delete(`${baseUrlEmployeesApi}/employees/${employeeId}`, { 
+            timeout: time,
+            headers: {
+                Accept: 'application/json',
+                Authorization: `Basic ${Buffer.from(`${userName}:${password}`).toString('base64')}`
+            }
+        });
     });
 
     test('PUT /employees 400 status code', async () => {
         let employeeId = '';
-        const request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
+        const post_request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
             timeout: time,
             data: {
                 firstName: firstName,
@@ -181,30 +211,38 @@ test.describe("@employees-api", () => {
                 Authorization: `Basic ${Buffer.from(`${userName}:${password}`).toString('base64')}`
             }
         });
-        expect(request.status()).toBe(200);
+
         //save the response and get the id of the employee
-        let response = await request.json();
+        let response = await post_request.json();
         employeeId = response.id;
 
-        const request1 = await apiContext.put(`${baseUrlEmployeesApi}/employees`, { 
+        const put_request = await apiContext.put(`${baseUrlEmployeesApi}/employees`, { 
             timeout: time,
             data: {
                 id: employeeId,
                 firstName: firstName + "Edited",
                 lastName: lastName + "Edited",
-                dependants: "100",
+                dependants: 100,
             },
             headers: {
                 Accept: 'application/json',
                 Authorization: `Basic ${Buffer.from(`${userName}:${password}`).toString('base64')}`
             }
         });
-        expect(request1.status()).toBe(400);
+        expect(put_request.status()).toBe(400);
+
+        const delete_request = await apiContext.delete(`${baseUrlEmployeesApi}/employees/${employeeId}`, { 
+            timeout: time,
+            headers: {
+                Accept: 'application/json',
+                Authorization: `Basic ${Buffer.from(`${userName}:${password}`).toString('base64')}`
+            }
+        });
     });
 
     test('PUT /employees 401 status code', async () => {
         let employeeId = '';
-        const request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
+        const post_request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
             timeout: time,
             data: {
                 firstName: firstName,
@@ -216,12 +254,12 @@ test.describe("@employees-api", () => {
                 Authorization: `Basic ${Buffer.from(`${userName}:${password}`).toString('base64')}`
             }
         });
-        expect(request.status()).toBe(200);
+
         //save the response and get the id of the employee
-        let response = await request.json();
+        let response = await post_request.json();
         employeeId = response.id;
 
-        const request1 = await apiContext.put(`${baseUrlEmployeesApi}/employees`, { 
+        const put_request = await apiContext.put(`${baseUrlEmployeesApi}/employees`, { 
             timeout: time,
             data: {
                 id: employeeId,
@@ -233,12 +271,20 @@ test.describe("@employees-api", () => {
                 Accept: 'application/json'
             }
         });
-        expect(request1.status()).toBe(401);
+        expect(put_request.status()).toBe(401);
+
+        const request2 = await apiContext.delete(`${baseUrlEmployeesApi}/employees/${employeeId}`, { 
+            timeout: time,
+            headers: {
+                Accept: 'application/json',
+                Authorization: `Basic ${Buffer.from(`${userName}:${password}`).toString('base64')}`
+            }
+        });
     });
 
     test('DELETE /employees 200 status code', async () => {
         let employeeId = '';
-        const request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
+        const post_request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
             timeout: time,
             data: {
                 firstName: firstName,
@@ -250,24 +296,24 @@ test.describe("@employees-api", () => {
                 Authorization: `Basic ${Buffer.from(`${userName}:${password}`).toString('base64')}`
             }
         });
-        expect(request.status()).toBe(200);
+
         //save the response and get the id of the employee
-        let response = await request.json();
+        let response = await post_request.json();
         employeeId = response.id;
 
-        const request1 = await apiContext.delete(`${baseUrlEmployeesApi}/employees/${employeeId}`, { 
+        const delete_request = await apiContext.delete(`${baseUrlEmployeesApi}/employees/${employeeId}`, { 
             timeout: time,
             headers: {
                 Accept: 'application/json',
                 Authorization: `Basic ${Buffer.from(`${userName}:${password}`).toString('base64')}`
             }
         });
-        expect(request1.status()).toBe(200);
+        expect(delete_request.status()).toBe(200);
     });
 
     test('DELETE /employees 401 status code', async () => {
         let employeeId = '';
-        const request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
+        const post_request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
             timeout: time,
             data: {
                 firstName: firstName,
@@ -279,9 +325,10 @@ test.describe("@employees-api", () => {
                 Authorization: `Basic ${Buffer.from(`${userName}:${password}`).toString('base64')}`
             }
         });
-        expect(request.status()).toBe(200);
+        expect(post_request.status()).toBe(200);
+
         //save the response and get the id of the employee
-        let response = await request.json();
+        let response = await post_request.json();
         employeeId = response.id;
 
         const request1 = await apiContext.delete(`${baseUrlEmployeesApi}/employees/${employeeId}`, { 
@@ -291,11 +338,19 @@ test.describe("@employees-api", () => {
             }
         });
         expect(request1.status()).toBe(401);
+
+        const delete_request = await apiContext.delete(`${baseUrlEmployeesApi}/employees/${employeeId}`, { 
+            timeout: time,
+            headers: {
+                Accept: 'application/json',
+                Authorization: `Basic ${Buffer.from(`${userName}:${password}`).toString('base64')}`
+            }
+        });
     });
 
     test('DELETE /employees 404 status code', async () => {
         let employeeId = '';
-        const request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
+        const post_request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
             timeout: time,
             data: {
                 firstName: firstName,
@@ -307,9 +362,10 @@ test.describe("@employees-api", () => {
                 Authorization: `Basic ${Buffer.from(`${userName}:${password}`).toString('base64')}`
             }
         });
-        expect(request.status()).toBe(200);
+        expect(post_request.status()).toBe(200);
+
         //save the response and get the id of the employee
-        let response = await request.json();
+        let response = await post_request.json();
         employeeId = response.id;
 
         const request1 = await apiContext.delete(`${baseUrlEmployeesApi}/employees/employeeId`, { 
@@ -320,6 +376,58 @@ test.describe("@employees-api", () => {
             }
         });
         expect(request1.status()).toBe(404);
-    });
 
+        const delete_request = await apiContext.delete(`${baseUrlEmployeesApi}/employees/${employeeId}`, { 
+            timeout: time,
+            headers: {
+                Accept: 'application/json',
+                Authorization: `Basic ${Buffer.from(`${userName}:${password}`).toString('base64')}`
+            }
+        });
+    });
+});
+
+test.describe("Salary tests", () => {
+
+    test('Salary is calculated correctly' , async () => {
+        let employeeId = '';
+        let dependants = 0;
+        let salary = 0;
+        let gross = 0;
+        let benefitsCost = 0;
+        let net = 0;
+    
+        const post_request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
+            timeout: time,
+            data: {
+                firstName: firstName,
+                lastName: lastName,
+                dependants: dependants,
+            },
+            headers: {
+                Accept: 'application/json',
+                Authorization: `Basic ${Buffer.from(`${userName}:${password}`).toString('base64')}`
+            }
+        });
+        expect(post_request.status()).toBe(200);
+
+        //save the response and get the id of the employee
+        let response = await post_request.json();
+        employeeId = response.id;
+        dependants = response.dependants;
+        salary = response.salary;
+        gross = response.gross;
+        benefitsCost = response.benefitsCost;
+        net = response.net;
+
+        expect( ( gross - ( ( ( dependants * 500 ) + 1000 ) / 26 )).toFixed(2) ).toEqual( net.toFixed(2) );
+
+        const delete_request = await apiContext.delete(`${baseUrlEmployeesApi}/employees/${employeeId}`, { 
+            timeout: time,
+            headers: {
+                Accept: 'application/json',
+                Authorization: `Basic ${Buffer.from(`${userName}:${password}`).toString('base64')}`
+            }
+        });
+    });
 });

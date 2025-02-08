@@ -5,6 +5,14 @@ import { DeleteEmployeePage } from '../../pages/delete-employee-page';
 import { EditEmployeePage } from '../../pages/edit-employee-page';
 import { LogInPage } from '../../pages/login-page';
 
+const baseUrl = `${process.env.BASE_URL}`;
+const password = `${process.env.PASSWORD}`;
+const userName = `${process.env.USER_NAME}`;
+
+let dependants: number;
+let firstName: string;
+let lastName: string;
+
 test.describe('@dashboard DashboardPage tests', () => {
     let addEmployeePage: AddEmployeePage;
     let dashboardPage: DashboardPage;
@@ -18,63 +26,39 @@ test.describe('@dashboard DashboardPage tests', () => {
         deleteEmployeePage = new DeleteEmployeePage(page);
         editEmployeePage = new EditEmployeePage(page);
         logInPage = new LogInPage(page);
-        await page.goto('https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/Account/Login');
+
+        dependants = Math.trunc(Math.random()*20);
+        firstName = `FEFN${Date.now()}`;
+        lastName = `FELN${Date.now()}`;
+    
+        await page.goto(baseUrl);
+        await logInPage.logIn(userName, password);
+        await page.waitForLoadState();
     });
 
     test('Add a new employee', async ({ page }) => {
-        await logInPage.logIn('TestUser723', ".a'/;a#[a*CP");
-        await expect(dashboardPage.logOutLink).toBeVisible();
-        await page.waitForTimeout(2000);
-
         await dashboardPage.addEmployeeButton.click();
-        await page.waitForTimeout(2000);
+        await addEmployeePage.addEmployee(firstName, lastName, dependants.toString());
 
-        await addEmployeePage.addEmployee('Test', 'User', '1');
-        await page.waitForTimeout(2000);
+        await expect(page.getByText(firstName)).toBeVisible();
     });
 
-    test.only('Edit an employee', async ({ page }) => {
-        await logInPage.logIn('TestUser723', ".a'/;a#[a*CP");
-        await expect(dashboardPage.logOutLink).toBeVisible();
-
-        await page.waitForTimeout(2000);
-
-
+    test('Edit an employee', async ({ page }) => {
         await dashboardPage.addEmployeeButton.click();
-        await page.waitForTimeout(2000);
-
-        await addEmployeePage.addEmployee('Test', 'User', '1');
-        await page.waitForTimeout(2000);
-
-
+        await addEmployeePage.addEmployee(firstName, lastName, dependants.toString());
+        await page.waitForLoadState();
         await dashboardPage.editAction.click();
+        await editEmployeePage.editEmployee(firstName + "E", lastName + "E", dependants.toString());
 
-        await page.waitForTimeout(2000);
-
-        await editEmployeePage.editEmployee('TestE', 'UserE', '7');
-        await page.waitForTimeout(2000);
-
+        await expect(page.getByText(firstName + "E")).toBeVisible();
     });
 
-    test('Delete an employee', async ({ page }) => {
-        await logInPage.logIn('TestUser723', ".a'/;a#[a*CP");
-        await expect(dashboardPage.logOutLink).toBeVisible();
-        await page.waitForTimeout(2000);
-
-
+    test.only('Delete an employee', async ({ page }) => {
         await dashboardPage.addEmployeeButton.click();
-        await page.waitForTimeout(2000);
-
-        await addEmployeePage.addEmployee('Test', 'User', '1');
-        await page.waitForTimeout(2000);
-
-
+        await addEmployeePage.addEmployee(firstName, lastName, dependants.toString());
         await dashboardPage.deleteAction.click();
-
-        await page.waitForTimeout(2000);
-
         await deleteEmployeePage.deleteButton.click();
 
-        await page.waitForTimeout(2000);
+        await expect(page.getByText(firstName)).not.toBeVisible();
     });
 });
