@@ -27,7 +27,7 @@ test.beforeEach(async () => {
   
 test.describe("@employees-api", () => {
 
-    test('GET /employees 200 status code', async () => {
+    test('@smoke GET /employees 200 status code', async () => {
         const get_request = await apiContext.get(`${baseUrlEmployeesApi}/employees`, { 
         timeout: time, 
         headers: {
@@ -48,7 +48,7 @@ test.describe("@employees-api", () => {
         expect(get_request.status()).toBe(401);
     });
 
-    test('POST /employees 200 status code' , async () => {
+    test('@smoke POST /employees 200 status code' , async () => {
         let employeeId = '';
         const post_request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
             timeout: time,
@@ -108,7 +108,7 @@ test.describe("@employees-api", () => {
         expect(post_request.status()).toBe(400);
     });
 
-    test('GET /employees/{id} 200 status code', async () => {
+    test('@smoke GET /employees/{id} 200 status code', async () => {
         let employeeId = '';
         const post_request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
             timeout: time,
@@ -154,7 +154,7 @@ test.describe("@employees-api", () => {
         expect(get_request.status()).toBe(401);
     });
 
-    test('PUT /employees 200 status code', async () => {
+    test('@smoke PUT /employees 200 status code', async () => {
         let employeeId = '';
         const post_request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
             timeout: time,
@@ -282,7 +282,7 @@ test.describe("@employees-api", () => {
         });
     });
 
-    test('DELETE /employees 200 status code', async () => {
+    test('@smoke DELETE /employees 200 status code', async () => {
         let employeeId = '';
         const post_request = await apiContext.post(`${baseUrlEmployeesApi}/employees`, { 
             timeout: time,
@@ -389,7 +389,7 @@ test.describe("@employees-api", () => {
 
 test.describe("Salary tests", () => {
 
-    test('Salary is calculated correctly' , async () => {
+    test('@smoke Salary is calculated correctly' , async () => {
         let employeeId = '';
         let dependants = 0;
         let salary = 0;

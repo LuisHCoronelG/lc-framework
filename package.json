@@ -4,9 +4,11 @@
   "description": "My automation framework",
   "main": "index.js",
   "scripts": {
-    "e2e:tests":"",
-    "integration:tests":"npx playwright test tests/integration/employees-api.spec.ts",
-    "performance:tests":"k6 run tests/performance/employees-api-performance.js"
+    "e2e:tests":"npx playwright test tests/e2e/*.ts",
+    "e2e:smoke:tests":"npx playwright test tests/e2e/*.ts --grep @smoke",
+    "integration:tests":"npx playwright test tests/integration/*.ts",
+    "integrations:smoke:tests":"npx playwright test tests/integration/*.ts --grep @smoke",
+    "performance:tests":"k6 run tests/performance/*.js"
   },
   "keywords": [],
   "author": "",

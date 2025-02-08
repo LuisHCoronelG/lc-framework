@@ -36,14 +36,14 @@ test.describe('@dashboard DashboardPage tests', () => {
         await page.waitForLoadState();
     });
 
-    test('Add a new employee', async ({ page }) => {
+    test('@smoke Add a new employee', async ({ page }) => {
         await dashboardPage.addEmployeeButton.click();
         await addEmployeePage.addEmployee(firstName, lastName, dependants.toString());
 
         await expect(page.getByText(firstName)).toBeVisible();
     });
 
-    test('Edit an employee', async ({ page }) => {
+    test('@smoke Edit an employee', async ({ page }) => {
         await dashboardPage.addEmployeeButton.click();
         await addEmployeePage.addEmployee(firstName, lastName, dependants.toString());
         await page.waitForLoadState();
@@ -53,7 +53,7 @@ test.describe('@dashboard DashboardPage tests', () => {
         await expect(page.getByText(firstName + "E")).toBeVisible();
     });
 
-    test.only('Delete an employee', async ({ page }) => {
+    test('@smoke Delete an employee', async ({ page }) => {
         await dashboardPage.addEmployeeButton.click();
         await addEmployeePage.addEmployee(firstName, lastName, dependants.toString());
         await dashboardPage.deleteAction.click();

@@ -16,7 +16,7 @@ test.describe('@logIn LogInPage tests', () => {
     await page.goto(baseUrl);
   });
 
-  test('Login with valid user name and valid password', async ({ page }) => {
+  test('@smoke Login with valid user name and valid password', async ({ page }) => {
     await logInPage.logIn(userName, password);
     await expect(dashboardPage.logOutLink).toBeVisible();
   });
