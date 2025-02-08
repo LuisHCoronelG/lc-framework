@@ -53,12 +53,16 @@ test.describe('@dashboard DashboardPage tests', () => {
         await expect(page.getByText(firstName + "E")).toBeVisible();
     });
 
-    test('@smoke Delete an employee', async ({ page }) => {
+    test.only('@smoke Delete an employee', async ({ page }) => {
         await dashboardPage.addEmployeeButton.click();
         await addEmployeePage.addEmployee(firstName, lastName, dependants.toString());
-        await dashboardPage.deleteAction.click();
+        const firstNameLocator = page.locator('td:nth-child(2)', { hasText: firstName });
+        const deletOption = page.locator('table tbody tr', { has: firstNameLocator }).locator('i.fas.fa-times');
+        await deletOption.click();
         await deleteEmployeePage.deleteButton.click();
+        await firstNameLocator.waitFor({ state: 'detached' });
 
         await expect(page.getByText(firstName)).not.toBeVisible();
     });
 });
+
