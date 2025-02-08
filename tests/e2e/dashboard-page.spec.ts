@@ -53,7 +53,7 @@ test.describe('@dashboard DashboardPage tests', () => {
         await expect(page.getByText(firstName + "E")).toBeVisible();
     });
 
-    test.only('@smoke Delete an employee', async ({ page }) => {
+    test('@smoke Delete an employee', async ({ page }) => {
         await dashboardPage.addEmployeeButton.click();
         await addEmployeePage.addEmployee(firstName, lastName, dependants.toString());
         const firstNameLocator = page.locator('td:nth-child(2)', { hasText: firstName });
